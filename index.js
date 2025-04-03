@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'node:http';
 import { Server } from 'socket.io';
+import open from 'open';
 import scrapeData from './scraper.js';
 
 const app = express();
@@ -25,6 +26,7 @@ async function updateData() {
 
 server.listen(3000, async () => {
   console.log("🚀 Serveur lancé sur http://localhost:3000");
+  await open("http://localhost:3000");
   updateData();
   interval = setInterval(updateData, 30000);
 });
