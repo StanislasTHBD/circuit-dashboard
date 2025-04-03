@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Stock</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background-color: #1e1e1e;
+      font-family: 'Segoe UI', sans-serif;
+      color: #eee;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #00bfff;
+      margin-bottom: 20px;
+    }
+    .dashboard {
+      display: flex;
+      gap: 40px;
+      width: 100%;
+      max-width: 1400px;
+    }
+    .table-wrapper {
+      flex: 1;
+      background: #2c2f33;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.5);
+    }
+    h2 {
+      text-align: center;
+      color: #f0f0f0;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    thead {
+      background-color: #3a3f44;
+    }
+    th {
+      color: #00bfff;
+    }
+    tbody tr:nth-child(odd) {
+      background-color: #292d32;
+    }
+    tbody tr:nth-child(even) {
+      background-color: #24282c;
+    }
+    .low-stock {
+      color: #ff4c4c;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Stock Circuit Croix - Dashboard</h1>
+  <div class="dashboard">
+    <div class="table-wrapper">
+      <h2>Gentlemen Rider</h2>
+      <table>
+        <thead><tr><th>Date</th><th>Stock</th></tr></thead>
+        <tbody id="gentlemen-body"></tbody>
+      </table>
+    </div>
+    <div class="table-wrapper">
+      <h2>Grands Débutants</h2>
+      <table>
+        <thead><tr><th>Date</th><th>Stock</th></tr></thead>
+        <tbody id="debutants-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+
+    socket.on("data", (data) => {
+      const gentlemen = data.filter(d => d.Pilote === "Gentlemen Rider");
+      const debutants = data.filter(d => d.Pilote === "Grands Débutants");
+
+      const gBody = document.getElementById("gentlemen-body");
+      const dBody = document.getElementById("debutants-body");
+
+      gBody.innerHTML = gentlemen.map(d =>
+        `<tr><td>${d.Date}</td><td class="${parseInt(d.Stock) < 10 ? 'low-stock' : ''}">${d.Stock}</td></tr>`
+      ).join("");
+
+      dBody.innerHTML = debutants.map(d =>
+        `<tr><td>${d.Date}</td><td class="${parseInt(d.Stock) < 10 ? 'low-stock' : ''}">${d.Stock}</td></tr>`
+      ).join("");
+    });
+  </script>
+</body>
+</html>
