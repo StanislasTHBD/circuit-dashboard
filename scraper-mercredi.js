@@ -47,7 +47,7 @@ async function scrapeData() {
         return stockText ? stockText.textContent.trim() : "Non dispo";
       });
 
-      data.push({ Pilote: pilote, Date: date, Stock: stock });
+      data.push({ PiloteMercredi: pilote, DateMercredi: date, StockMercredi: stock });
     }
   }
 

@@ -5,6 +5,7 @@
   <title>Dashboard Stock</title>
   <script src="/socket.io/socket.io.js"></script>
   <style>
+    /* Global Styles */
     body {
       margin: 0;
       background-color: #1e1e1e;
@@ -14,92 +15,295 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      box-sizing: border-box;
     }
+
     h1 {
       color: #00bfff;
       margin-bottom: 20px;
+      font-size: 2.5rem;
+      text-align: center;
     }
-    .dashboard {
-      display: flex;
-      gap: 40px;
+
+    /* Main Wrapper */
+    .dashboard-wrapper {
       width: 100%;
       max-width: 1400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
+
+    .section-title {
+      color: #00bfff;
+      font-size: 2rem;
+      margin-top: 40px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 40px;
+      width: 100%;
+      justify-items: center;
+      margin-top: 20px;
+    }
+
+    /* Table Wrapper Styles */
     .table-wrapper {
-      flex: 1;
       background: #2c2f33;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+      transition: transform 0.3s ease;
+      width: 100%;
     }
+
+    .table-wrapper:hover {
+      transform: scale(1.05);
+    }
+
+    /* Table Header */
     h2 {
       text-align: center;
       color: #f0f0f0;
-      font-size: 1.2rem;
+      font-size: 1.4rem;
       margin-bottom: 15px;
+      text-transform: uppercase;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
     }
+
     th, td {
-      padding: 10px;
+      padding: 12px 15px;
       text-align: left;
+      font-size: 1rem;
     }
+
     thead {
       background-color: #3a3f44;
     }
+
     th {
       color: #00bfff;
     }
+
     tbody tr:nth-child(odd) {
       background-color: #292d32;
     }
+
     tbody tr:nth-child(even) {
       background-color: #24282c;
     }
+
+    tbody tr:hover {
+      background-color: #444a52;
+    }
+
     .low-stock {
       color: #ff4c4c;
       font-weight: bold;
+    }
+
+    /* Media Query for Smaller Screens */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .table-wrapper {
+        padding: 15px;
+      }
+
+      .section-title {
+        font-size: 1.6rem;
+      }
     }
   </style>
 </head>
 <body>
   <h1>Stock Circuit Croix - Dashboard</h1>
-  <div class="dashboard">
-    <div class="table-wrapper">
-      <h2>Gentlemen Rider</h2>
-      <table>
-        <thead><tr><th>Date</th><th>Stock</th></tr></thead>
-        <tbody id="gentlemen-body"></tbody>
-      </table>
+
+  <!-- Date de mise à jour -->
+  <p id="update-time">Dernière mise à jour : <span id="last-updated"></span></p>
+
+  <!-- Timer pour la prochaine mise à jour -->
+  <p id="next-update-time">Prochaine mise à jour dans : <span id="countdown-timer"></span></p>
+
+  <div class="dashboard-wrapper">
+    <!-- Section Mercredi -->
+    <div class="section-title">Mercredi</div>
+    <div class="dashboard">
+      <div class="table-wrapper">
+        <h2>Gentlemen Rider</h2>
+        <table>
+          <thead><tr><th>Date</th><th>Stock</th></tr></thead>
+          <tbody id="gentlemen-body"></tbody>
+        </table>
+      </div>
+      <div class="table-wrapper">
+        <h2>Grands Débutants</h2>
+        <table>
+          <thead><tr><th>Date</th><th>Stock</th></tr></thead>
+          <tbody id="debutants-body"></tbody>
+        </table>
+      </div>
     </div>
-    <div class="table-wrapper">
-      <h2>Grands Débutants</h2>
-      <table>
-        <thead><tr><th>Date</th><th>Stock</th></tr></thead>
-        <tbody id="debutants-body"></tbody>
-      </table>
+
+    <!-- Section Samedi -->
+    <div class="section-title">Samedi</div>
+    <div class="dashboard">
+      <div class="table-wrapper">
+        <h2>Débutant (tour sup. 1.10')</h2>
+        <table>
+          <thead><tr><th>Date</th><th>Stock</th></tr></thead>
+          <tbody id="debutant-sup110-body"></tbody>
+        </table>
+      </div>
+      <div class="table-wrapper">
+        <h2>Intermédiaire (tour entre 1.05' et 1.10')</h2>
+        <table>
+          <thead><tr><th>Date</th><th>Stock</th></tr></thead>
+          <tbody id="intermediaire-105110-body"></tbody>
+        </table>
+      </div>
+      <div class="table-wrapper">
+        <h2>Confirmé (tour entre 1.01' et 1.05')</h2>
+        <table>
+          <thead><tr><th>Date</th><th>Stock</th></tr></thead>
+          <tbody id="confirme-101105-body"></tbody>
+        </table>
+      </div>
+      <div class="table-wrapper">
+        <h2>Expert (tour inf. à 1.01')</h2>
+        <table>
+          <thead><tr><th>Date</th><th>Stock</th></tr></thead>
+          <tbody id="expert-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section Vendredi/Lundi -->
+    <div class="section-title">Vendredi/Lundi</div>
+    <div class="dashboard">
+      <div class="table-wrapper">
+        <h2>Débutant (tour sup. 1.10')</h2>
+        <table>
+          <thead><tr><th>Date</th><th>Stock</th></tr></thead>
+          <tbody id="debutant-sup110-vl-body"></tbody>
+        </table>
+      </div>
+      <div class="table-wrapper">
+        <h2>Intermédiaire (tour entre 1.05' et 1.10')</h2>
+        <table>
+          <thead><tr><th>Date</th><th>Stock</th></tr></thead>
+          <tbody id="intermediaire-105110-vl-body"></tbody>
+        </table>
+      </div>
+      <div class="table-wrapper">
+        <h2>Confirmé (tour entre 1.01' et 1.05')</h2>
+        <table>
+          <thead><tr><th>Date</th><th>Stock</th></tr></thead>
+          <tbody id="confirme-101105-vl-body"></tbody>
+        </table>
+      </div>
+      <div class="table-wrapper">
+        <h2>Expert (tour inf. à 1.01')</h2>
+        <table>
+          <thead><tr><th>Date</th><th>Stock</th></tr></thead>
+          <tbody id="expert-vl-body"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
   <script>
     const socket = io();
 
+    // Affichage des données reçues
     socket.on("data", (data) => {
-      const gentlemen = data.filter(d => d.Pilote === "Gentlemen Rider");
-      const debutants = data.filter(d => d.Pilote === "Grands Débutants");
+      // Section Mercredi
+      const gentlemen = data.filter(d => d.PiloteMercredi === "Gentlemen Rider");
+      const grandsDebutants = data.filter(d => d.PiloteMercredi === "Grands Débutants");
 
+      // Section Samedi
+      const debutantSup110 = data.filter(d => d.NiveauDuPiloteSamedi === "Débutant (tour sup. 1.10')");
+      const intermediaire105110 = data.filter(d => d.NiveauDuPiloteSamedi === "Intermédiaire (tour entre 1.05' et 1.10')");
+      const confirme101105 = data.filter(d => d.NiveauDuPiloteSamedi === "Confirmé (tour entre 1.01' et 1.05')");
+      const expert = data.filter(d => d.NiveauDuPiloteSamedi === "Expert (tour inf. à 1.01')");
+
+      // Section Vendredi/Lundi
+      const debutantSup110VL = data.filter(d => d.NiveauDuPiloteVendrediLundi === "Débutant (tour sup. 1.10')");
+      const intermediaire105110VL = data.filter(d => d.NiveauDuPiloteVendrediLundi === "Intermédiaire (tour entre 1.05' et 1.10')");
+      const confirme101105VL = data.filter(d => d.NiveauDuPiloteVendrediLundi === "Confirmé (tour entre 1.01' et 1.05')");
+      const expertVL = data.filter(d => d.NiveauDuPiloteVendrediLundi === "Expert (tour inf. à 1.01')");
+
+      // Section Mercredi
       const gBody = document.getElementById("gentlemen-body");
       const dBody = document.getElementById("debutants-body");
+      // Section Samedi
+      const d110Body = document.getElementById("debutant-sup110-body");
+      const i105110Body = document.getElementById("intermediaire-105110-body");
+      const c101105Body = document.getElementById("confirme-101105-body");
+      const eBody = document.getElementById("expert-body");
+      // Section Vendredi/Lundi
+      const d110VLBody = document.getElementById("debutant-sup110-vl-body");
+      const i105110VLBody = document.getElementById("intermediaire-105110-vl-body");
+      const c101105VLBody = document.getElementById("confirme-101105-vl-body");
+      const eVLBody = document.getElementById("expert-vl-body");
 
-      gBody.innerHTML = gentlemen.map(d =>
-        `<tr><td>${d.Date}</td><td class="${parseInt(d.Stock) < 10 ? 'low-stock' : ''}">${d.Stock}</td></tr>`
-      ).join("");
+      // Rendu des données dans les tables
+      gBody.innerHTML = gentlemen.map(d => `<tr><td>${d.DateMercredi}</td><td class="${parseInt(d.StockMercredi) < 10 ? 'low-stock' : ''}">${d.StockMercredi}</td></tr>`).join("");
+      dBody.innerHTML = grandsDebutants.map(d => `<tr><td>${d.DateMercredi}</td><td class="${parseInt(d.StockMercredi) < 10 ? 'low-stock' : ''}">${d.StockMercredi}</td></tr>`).join("");
 
-      dBody.innerHTML = debutants.map(d =>
-        `<tr><td>${d.Date}</td><td class="${parseInt(d.Stock) < 10 ? 'low-stock' : ''}">${d.Stock}</td></tr>`
-      ).join("");
+      d110Body.innerHTML = debutantSup110.map(d => `<tr><td>${d.DateSamedi}</td><td class="${parseInt(d.StockSamedi) < 10 ? 'low-stock' : ''}">${d.StockSamedi}</td></tr>`).join("");
+      i105110Body.innerHTML = intermediaire105110.map(d => `<tr><td>${d.DateSamedi}</td><td class="${parseInt(d.StockSamedi) < 10 ? 'low-stock' : ''}">${d.StockSamedi}</td></tr>`).join("");
+      c101105Body.innerHTML = confirme101105.map(d => `<tr><td>${d.DateSamedi}</td><td class="${parseInt(d.StockSamedi) < 10 ? 'low-stock' : ''}">${d.StockSamedi}</td></tr>`).join("");
+      eBody.innerHTML = expert.map(d => `<tr><td>${d.DateSamedi}</td><td class="${parseInt(d.StockSamedi) < 10 ? 'low-stock' : ''}">${d.StockSamedi}</td></tr>`).join("");
+
+      d110VLBody.innerHTML = debutantSup110VL.map(d => `<tr><td>${d.DateVendrediLundi}</td><td class="${parseInt(d.StockVendrediLundi) < 10 ? 'low-stock' : ''}">${d.StockVendrediLundi}</td></tr>`).join("");
+      i105110VLBody.innerHTML = intermediaire105110VL.map(d => `<tr><td>${d.DateVendrediLundi}</td><td class="${parseInt(d.StockVendrediLundi) < 10 ? 'low-stock' : ''}">${d.StockVendrediLundi}</td></tr>`).join("");
+      c101105VLBody.innerHTML = confirme101105VL.map(d => `<tr><td>${d.DateVendrediLundi}</td><td class="${parseInt(d.StockVendrediLundi) < 10 ? 'low-stock' : ''}">${d.StockVendrediLundi}</td></tr>`).join("");
+      eVLBody.innerHTML = expertVL.map(d => `<tr><td>${d.DateVendrediLundi}</td><td class="${parseInt(d.StockVendrediLundi) < 10 ? 'low-stock' : ''}">${d.StockVendrediLundi}</td></tr>`).join("");
+    });
+
+    socket.on("update-time", (updateTime) => {
+      const lastUpdatedElement = document.getElementById("last-updated");
+      if (lastUpdatedElement) {
+        lastUpdatedElement.textContent = updateTime;
+      }
+    });
+
+    // Écoute de l'événement "next-update" pour mettre à jour le compte à rebours
+    socket.on("next-update", (remainingTime) => {
+      const countdownElement = document.getElementById("countdown-timer");
+      if (countdownElement) {
+        countdownElement.textContent = remainingTime;
+
+        // Mise à jour du compte à rebours toutes les secondes
+        let remainingSeconds = parseInt(remainingTime.split(' ')[0]) * 60 + parseInt(remainingTime.split(' ')[2]);
+        const countdownInterval = setInterval(() => {
+          if (remainingSeconds > 0) {
+            remainingSeconds--;
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            countdownElement.textContent = `${minutes} minutes ${seconds} secondes`;
+          } else {
+            clearInterval(countdownInterval);
+          }
+        }, 1000);
+      }
     });
   </script>
 </body>
