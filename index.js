@@ -1,7 +1,7 @@
 import express from 'express';
 import http from 'node:http';
 import { Server } from 'socket.io';
-// import open from 'open';
+import open from 'open';
 import scrapeDataMercredi from './scraper-mercredi.js';
 import scrapeDataSamedi from './scraper-samedi.js';
 import scrapeDataVendrediLundi from './scraper-vendredi-lundi.js';
@@ -58,11 +58,9 @@ async function updateData() {
   }
 }
 
-const PORT = process.env.PORT || 3179;
-
 server.listen(3179, async () => {
-  console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
-  // await open("http://localhost:3179");
+  console.log("🚀 Serveur lancé sur http://localhost:3179");
+  await open("http://localhost:3179");
   updateData();
   setInterval(updateData, 300000); // Update every 5 min
 });
